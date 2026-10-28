@@ -20,4 +20,9 @@
       <PackageReference Include="Scalar.AspNetCore" Version="2.18.3" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="News\Application\" />
+      <Folder Include="News\Interfaces\" />
+    </ItemGroup>
+
 </Project>
