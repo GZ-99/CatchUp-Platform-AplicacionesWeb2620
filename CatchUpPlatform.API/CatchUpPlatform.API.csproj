@@ -21,7 +21,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="News\Application\" />
       <Folder Include="News\Interfaces\" />
     </ItemGroup>
 
