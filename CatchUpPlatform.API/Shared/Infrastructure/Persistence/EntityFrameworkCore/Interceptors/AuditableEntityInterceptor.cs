@@ -1,19 +1,31 @@
 using CatchUpPlatform.API.Shared.Domain.Model;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace CatchUpPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Interceptors;
 
-public class AuditableEntityInterceptor : SaveChangesInterceptor
+/// <summary>
+///     EF Core interceptor that automatically populates audit timestamps on any entity
+///     that implements <see cref="IAuditableEntity"/>.
+/// </summary>
+/// <remarks>
+///     <list type="bullet">
+///         <item><description><c>CreatedDate</c> — set once when the entity is first added.</description></item>
+///         <item><description><c>UpdatedDate</c> — refreshed on every add or update.</description></item>
+///     </list>
+///     Register this interceptor in <c>AppDbContext.OnConfiguring</c> so it applies to all
+///     bounded contexts sharing the same <see cref="DbContext"/>.
+/// </remarks>
+public sealed class AuditableEntityInterceptor : SaveChangesInterceptor
 {
-    public override InterceptionResult<int> SavingChanges(
-        DbContextEventData eventData, 
-        InterceptionResult<int> result)
+    /// <inheritdoc />
+    public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
     {
         ApplyAuditTimestamps(eventData.Context);
         return base.SavingChanges(eventData, result);
     }
 
+    /// <inheritdoc />
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
         InterceptionResult<int> result,
@@ -31,11 +43,8 @@ public class AuditableEntityInterceptor : SaveChangesInterceptor
 
         foreach (var entry in context.ChangeTracker.Entries<IAuditableEntity>())
         {
-            if (entry.State is EntityState.Added or EntityState.Modified)
-                entry.Entity.UpdatedAt = now;
-            
-            if (entry.State == EntityState.Added)
-                entry.Entity.CreatedAt = now;
+            if (entry.State is EntityState.Added or EntityState.Modified) entry.Entity.UpdatedAt = now;
+            if (entry.State == EntityState.Added) entry.Entity.CreatedAt ??= now;
         }
     }
 }
