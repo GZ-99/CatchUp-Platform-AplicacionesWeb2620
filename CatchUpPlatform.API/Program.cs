@@ -1,4 +1,11 @@
+using CatchUpPlatform.API.News.Application.Internal.CommandServices;
+using CatchUpPlatform.API.News.Application.Internal.QueryServices;
+using CatchUpPlatform.API.News.Application.Services;
+using CatchUpPlatform.API.News.Domain.Repositories;
+using CatchUpPlatform.API.News.Infrastructure.Persistence.EntityFrameworkCore;
+using CatchUpPlatform.API.Shared.Domain.Repositories;
 using CatchUpPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
+using CatchUpPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using CatchUpPlatform.API.Shared.Interfaces.ASP.Configuration;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,6 +37,17 @@ builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
     if (builder.Environment.IsDevelopment())
         options.EnableSensitiveDataLogging();
 }); 
+
+// Configure Dependency Injection
+
+// Shared bounded context Injection Configuration
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// News bounded context Injection Configuration
+builder.Services.AddScoped<IFavoriteSourceRepository, FavoriteSourceRepository>();
+builder.Services.AddScoped<IFavoriteSourceCommandService, FavoriteSourceCommandService>();
+builder.Services.AddScoped<IFavoriteSourceQueryService, FavoriteSourceQueryService>();
+
 
 var app = builder.Build();
 
